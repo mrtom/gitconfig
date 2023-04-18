@@ -1,0 +1,29 @@
+[alias]
+	co = checkout
+	br = branch
+	ci = commit
+    st = status
+    #Housekeeping: Deletes all of the branches that are merged, and are not master or the current branch
+    hk = !(git branch --merged | egrep -v '^\\*|master' | xargs git branch -D) && :
+    #Deletes all of the branches, except for master and the current branch.
+    fire = !(git branch --merged | egrep -v '^\\*|master' | xargs git branch -D) && :
+    #Functionally git log, but it only logs the commits on the current branch that are unique to the current branch.
+    out = "!f() { str=""; while read -r foo; do str=($foo' '$str); done; if [ ! -z "${str// }" ]; then git show --shortstat $str; fi; }; git cherry | cut -c 3- | f {}"
+    #Creates and checks out a branch
+    nb = !git branch $1 && git checkout $1 && :
+    #If you have commits on one branch (possibly master), this will move all of them to another branch,
+    #delete them from the old branch, and rebase them on top of master in the new branch, which will be set upstream.
+    migrate = !git branch $1 && git reset --hard HEAD~`git cherry | wc -l | sed 's/^ *//'` && git checkout $1 && git branch --set-upstream-to=origin/master && git pull --rebase origin master && :
+    # Make git work a bit like arc
+    feature = nb
+[user]
+	name = Tom Elliott
+	email = tom@letsdothis.com
+[push]
+	default = current
+[core]
+	excludesfile = /Users/tom/.gitignore
+[pull]
+	rebase = true
+[init]
+	defaultBranch = main
